@@ -91,7 +91,6 @@ class Symphonium(App):
 		
 		
 	def showSplash(self):		
-		print "splash"
 		self.screenManager.current = 'splash'
 		
 		Animation(
@@ -101,7 +100,6 @@ class Symphonium(App):
 		
 		
 	def showMain(self):
-		print "main"
 		self.screenManager.current = 'main'
 		
 		Clock.schedule_interval(self.play, 60.0/self.bpm)
@@ -244,7 +242,8 @@ class Symphonium(App):
 	def load_preset(self, preset):
 		
 		namespace = dict()
-		execfile(self.presetPath + '/'+preset+'.py',namespace)
+		#execfile(self.presetPath + '/'+preset+'.py',namespace)
+		exec(open(self.presetPath + '/'+preset+'.py').read(),namespace)
 		
 		if self.paused == False:
 			self.toggle_pause()
