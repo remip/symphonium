@@ -1,0 +1,148 @@
+
+#:import w kivy.core.window
+
+#root
+FloatLayout:
+	Label:
+		text: 'loading...'
+
+		
+<Button,Label>
+	font_name: "Data/font/kiwischoolhandwritingregular.ttf"
+	font_size: '24sp'
+	
+<Pad>:
+    canvas:
+        Color:
+            rgb: (1, 1, 1)          
+        Color:
+            rgba: self.color
+        Rectangle:
+            pos:    self.pos
+            size:   self.size
+            source: getattr(self, 'background_%s_%s' % (self.state, self.playing))
+
+<SplashScreen>:  
+	background: background
+	title:      title
+	AnchorLayout:
+		on_touch_down: app.showMain()
+		Scatter:
+			id: background
+			do_rotation:    False
+			do_translation: False
+			do_scale:       False
+			Image:
+				source: 'Data/images/music-notes-hd-wallpapers.jpg'
+				width:  root.width
+				height: root.height
+				allow_stretch: True
+				keep_ratio:    False
+		Label:
+			id: title
+			color: [0, 0, 0, 0.9]
+			font_name: "Data/font/FREEBSC_.ttf"
+			text: ' Symphonium'
+			font_size: '182sp'
+            
+<MainScreen>:
+	grid: grid
+	BoxLayout:
+		orientation: 'horizontal'
+		BoxLayout:
+			orientation: 'vertical'
+			Label:
+				color: [0.9, 0.9, 0.9, 1]
+				font_name: "Data/font/FREEBSC_.ttf"
+				text: ' Symphonium'
+				font_size: '50sp'
+			Label:
+				text: 'BPM: %d' % app.bpm
+			Button:
+				text: 'Tempo up'
+				on_press: app.tempo_up()
+			Button:
+				text: 'Tempo down'
+				on_press: app.tempo_down()
+			Button:
+				text: 'Continue' if app.paused else 'Pause'
+				on_press: app.toggle_pause()
+			Button:
+				text: 'Clear'
+				on_press: app.reset()
+			Button:
+				text: 'Transpose up'
+				on_press: app.transpose_up()
+			Button:
+				text: 'Transpose down'
+				on_press: app.transpose_down()
+			Button:
+				text: 'Intrument: %s' % app.instrument
+				on_press: app.instrument_list.open()
+			Button:
+				text: 'Load song'
+				on_press: app.preset_list.open()
+			Button:
+				text: 'Game of life (%s)' % ( 'on' if app.game_of_life else 'off')
+				on_press: app.toggle_game_of_life()
+			Button:
+				text: 'Help'
+				on_press: app.help.open()
+		BoxLayout:
+			orientation: 'vertical'
+			size_hint: .1,1
+		StackLayout:
+			id: grid
+			orientation: 'lr-bt'
+			size_hint: None, None
+			width: min(w.Window.height, w.Window.width)
+			height: min(w.Window.height, w.Window.width)
+		
+<PresetList>:
+	size_hint: (0.5, 0.5)
+	BoxLayout:
+		orientation: 'vertical'
+		Button:
+			text: 'Song 1'
+			on_press: app.load_preset('song1')
+		Button:
+			text: 'Song 2'
+			on_press: app.load_preset('song2')
+		Button:
+			text: 'Game of life 1'
+			on_press: app.load_preset('game1')
+		Button:
+			text: 'Game of life 2'
+			on_press: app.load_preset('game2')
+		Button:
+			text: 'Game of life 3'
+			on_press: app.load_preset('game3')
+			
+
+<InstrumentList>:
+	size_hint: (0.5, 0.3)
+	BoxLayout:
+		orientation: 'vertical'
+		Button:
+			text: 'Kalimba'
+			on_press: app.load_kalimba(); root.dismiss()
+		Button:
+			text: 'Oud'
+			on_press: app.load_oud(); root.dismiss()
+
+<Help>:
+	size_hint: (0.8, 0.8)
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			color: [0.9, 0.9, 0.9, 1]
+			font_name: "Data/font/FREEBSC_.ttf"
+			text: ' Symphonium'
+			font_size: '72sp'
+		Label:
+			text: 'Press cells from the matrix to play the notes from a scale.\n\nFor the Kalimba instrument, the scale is a pentatonic.\n\nFor the oud instrument, the scale is a byzantine.'
+		Button:
+			size_hint: (1.0, 0.2)
+			text: 'Back'
+			on_press: root.dismiss()
+
