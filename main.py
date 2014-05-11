@@ -1,7 +1,6 @@
 import os
 import sys
-import random
-import json
+import time
 
 from kivy.app import App
 from kivy.animation import Animation
@@ -63,8 +62,10 @@ class Symphonium(App):
 	
 	grid = [[0 for i in range(16)] for i in range(16)]
 	current = 0;
+	time_last = 0
+	max_channels = 4
 	
-	def build(self):
+	def build(self):				
 		
 		self.load_kalimba() #by default
 		
@@ -108,21 +109,30 @@ class Symphonium(App):
 		#pause ?
 		self.instrument = 'Kalimba'
 		self.sounds = []
-		for i in range(16):
-			soundfile = self.soundPath + "/kalimba/kalimba%s.ogg" % (i+1)
-			self.sounds.append(SoundLoader.load(soundfile))
+		for c in range(self.max_channels):
+			self.sounds.append([])
+			for i in range(16):
+				soundfile = self.soundPath + "/kalimba/kalimba%s.ogg" % (i+1)
+				self.sounds[c].append(SoundLoader.load(soundfile))
 			
 	def load_oud(self, *largs):
 		#pause ?
 		self.instrument = 'Oud'
 		self.sounds = []
 		scale = ('B1', 'C2', 'C#2', 'E2', 'F2', 'G2', 'G#2', 'B2', 'C3', 'C#3', 'E3', 'F3', 'G3', 'G#3', 'B3', 'C4')
-		for i in scale:
-			soundfile = self.soundPath + "/oud/oud_%s.ogg" % (i)
-			self.sounds.append(SoundLoader.load(soundfile))
+		for c in range(self.max_channels):
+			self.sounds.append([])
+			for i in scale:
+				soundfile = self.soundPath + "/oud/oud_%s.ogg" % (i)
+				self.sounds[c].append(SoundLoader.load(soundfile))
 
 
 	def play(self,dt):
+		
+		if self.time_last != 0:
+			pass
+			#print("TIC %f" % (time.time() - self.time_last))
+		self.time_last = time.time()
 		
 		for i in range(16):
 			self.grid[i][self.current].playing = 'off'
@@ -137,8 +147,26 @@ class Symphonium(App):
 		for i in range(16):
 			self.grid[i][self.current].playing = 'on'
 			if self.grid[i][self.current].state == 'down':
-				self.sounds[i].stop()
-				self.sounds[i].play()
+				#dispatch on X channels to avoid audio glitches
+				self.sounds[self.current % self.max_channels][i].stop()
+				self.sounds[self.current % self.max_channels][i].play()
+				
+				# !!!! Sound objects seems to never change its state from to stop, bug ?
+				#found = False
+				#for c in range(self.max_channels):
+				#	#find a free channel
+				#	if self.sounds[c][i].state == 'stop':
+				#		self.sounds[c][i].play()
+				#		print("using channel %d for sound %d" % (c,i))
+				#		found = True
+				#		break
+				#	
+				#if found == False:
+				#	print("stopping channel 0 of sound %d" % i)
+				#	print("using channel 0 for sound %d" % i)
+				#	self.sounds[0][i].stop()
+				#	self.sounds[0][i].play()
+
 
 	def reset(self):
 		for i in range(16):
@@ -242,7 +270,6 @@ class Symphonium(App):
 	def load_preset(self, preset):
 		
 		namespace = dict()
-		#execfile(self.presetPath + '/'+preset+'.py',namespace)
 		exec(open(self.presetPath + '/'+preset+'.py').read(),namespace)
 		
 		if self.paused == False:
